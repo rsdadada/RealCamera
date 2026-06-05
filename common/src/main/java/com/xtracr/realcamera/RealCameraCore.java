@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.xtracr.realcamera.api.BindResult;
 import com.xtracr.realcamera.api.RealCameraAPI;
 import com.xtracr.realcamera.compat.DisableHelper;
+import com.xtracr.realcamera.compat.EMFCompat;
 import com.xtracr.realcamera.config.BindTarget;
 import com.xtracr.realcamera.config.ConfigFile;
 import com.xtracr.realcamera.config.DisableConfig;
@@ -74,7 +75,12 @@ public class RealCameraCore {
         newResult = RealCameraAPI.computeBindResult(client, partialTicks);
         if (!newResult.available()) {
             EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
-            dispatcher.render(entity, 0, 0, 0, Mth.lerp(partialTicks, entity.yRotO, entity.getYRot()), partialTicks, new PoseStack(), vertexCatcher, dispatcher.getPackedLightCoords(entity, partialTicks));
+            EMFCompat.VariableMapSnapshot emfVariables = EMFCompat.saveVariables(entity);
+            try {
+                dispatcher.render(entity, 0, 0, 0, Mth.lerp(partialTicks, entity.yRotO, entity.getYRot()), partialTicks, new PoseStack(), vertexCatcher, dispatcher.getPackedLightCoords(entity, partialTicks));
+            } finally {
+                emfVariables.restore();
+            }
             vertexCatcher.forEachBuffer(RealCameraCore::computeBindResult);
             vertexCatcher.clear();
         }
