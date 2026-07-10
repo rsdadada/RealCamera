@@ -37,10 +37,17 @@ dependencies {
     compileOnly("me.shedaniel.cloth:cloth-config:$clothConfigVersion") {
         exclude(group = "net.fabricmc.fabric-api")
     }
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 loom {
     accessWidenerPath.set(file("src/main/resources/realcamera.accesswidener"))
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 publishing {

@@ -84,7 +84,9 @@ public final class ModelViewScreen extends Screen {
     private final CycleIconButton bindXButton = new CycleIconButton(16, 16, 1, 2);
     private final CycleIconButton bindYButton = new CycleIconButton(16, 16, 0, 2);
     private final CycleIconButton bindZButton = new CycleIconButton(16, 16, 1, 2);
-    private final CycleIconButton bindRotButton = new CycleIconButton(16, 16, 1, 2);
+    private final CycleIconButton bindPitchButton = new CycleIconButton(16, 16, 1, 2);
+    private final CycleIconButton bindYawButton = new CycleIconButton(16, 16, 1, 2);
+    private final CycleIconButton bindRollButton = new CycleIconButton(16, 16, 1, 2);
     private final DoubleSlider entityPitchSlider = createSlider("pitch", wideWidgetWidth, -90.0, 90.0);
     private final DoubleSlider entityYawSlider = createSlider("yaw", wideWidgetWidth, -60.0, 60.0);
     private final NumberWidgetPair offsetXPair = new NumberWidgetPair(font, "offsetX", compactWidgetWidth, widgetHeight, ModConfig.MIN_OFFSET_F, ModConfig.MAX_OFFSET_F);
@@ -206,13 +208,15 @@ public final class ModelViewScreen extends Screen {
                 rows.addChild(offsetYPair, numericControlSettings);
                 rows.addChild(bindZButton, smallSettings).setTooltip(createTooltip("bindButtons"));
                 rows.addChild(offsetZPair, numericControlSettings);
-                rows.addChild(bindRotButton, smallSettings).setTooltip(createTooltip("bindButtons"));
+                rows.addChild(bindPitchButton, smallSettings).setTooltip(createTooltip("bindButtons"));
                 rows.addChild(offsetPitchPair, numericControlSettings);
-                rows.addChild(offsetYawPair, 2, grid.newCellSettings().padding(26, 2, 0, 0));
-                rows.addChild(new SimpleIconButton(0, 0, _ -> widgetPairs.forEach(pair -> pair.setNumber(0))), smallSettings);
+                rows.addChild(bindYawButton, smallSettings).setTooltip(createTooltip("bindButtons"));
+                rows.addChild(offsetYawPair, numericControlSettings);
+                rows.addChild(bindRollButton, smallSettings).setTooltip(createTooltip("bindButtons"));
                 rows.addChild(offsetRollPair, numericControlSettings);
                 rows.addChild(scaleField, smallSettings).setTooltip(createTooltip("scale"));
                 rows.addChild(depthField, smallSettings).setTooltip(createTooltip("depth"));
+                rows.addChild(new SimpleIconButton(0, 0, _ -> widgetPairs.forEach(pair -> pair.setNumber(0))), 2, smallSettings);
             }
             case DISABLE -> {
                 LayoutSettings offsetXSettings = grid.newCellSettings().padding(-13, 3, 1, 1);
@@ -657,7 +661,9 @@ public final class ModelViewScreen extends Screen {
         bindXButton.setValue(target.bindConfig().bindX() ? 0 : 1);
         bindYButton.setValue(target.bindConfig().bindY() ? 0 : 1);
         bindZButton.setValue(target.bindConfig().bindZ() ? 0 : 1);
-        bindRotButton.setValue(target.bindConfig().bindRotation() ? 0 : 1);
+        bindPitchButton.setValue(target.bindConfig().bindPitch() ? 0 : 1);
+        bindYawButton.setValue(target.bindConfig().bindYaw() ? 0 : 1);
+        bindRollButton.setValue(target.bindConfig().bindRoll() ? 0 : 1);
         OffsetConfig offsets = target.offsets();
         scaleField.setNumber(offsets.scale);
         offsetXPair.setNumber(offsets.x);
@@ -673,7 +679,14 @@ public final class ModelViewScreen extends Screen {
 
     private BindTarget genBindTarget() {
         TargetConfig targetConfig = new TargetConfig(forwardUField.getNumber(), forwardVField.getNumber(), upwardUField.getNumber(), upwardVField.getNumber(), posUField.getNumber(), posVField.getNumber());
-        BindConfig bindConfig = new BindConfig(bindXButton.getValue() == 0, bindYButton.getValue() == 0, bindZButton.getValue() == 0, bindRotButton.getValue() == 0);
+        BindConfig bindConfig = new BindConfig(
+                bindXButton.getValue() == 0,
+                bindYButton.getValue() == 0,
+                bindZButton.getValue() == 0,
+                bindPitchButton.getValue() == 0,
+                bindYawButton.getValue() == 0,
+                bindRollButton.getValue() == 0
+        );
         OffsetConfig offsets = new OffsetConfig(scaleField.getNumber(), offsetXPair.getNumber(), offsetYPair.getNumber(), offsetZPair.getNumber(), offsetPitchPair.getNumber(), offsetYawPair.getNumber(), offsetRollPair.getNumber());
         return new BindTarget(nameField.getValue(), textureIdField.getValue(), priorityField.getNumber(), depthField.getNumber(), targetConfig, bindConfig, offsets, new ArrayList<>(disableConfigs));
     }

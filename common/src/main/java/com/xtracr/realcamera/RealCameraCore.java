@@ -11,9 +11,9 @@ import com.xtracr.realcamera.renderer.BuiltIterableBuffer;
 import com.xtracr.realcamera.renderer.MultiVertexCatcher;
 import com.xtracr.realcamera.renderer.RoutingSubmitCollector;
 import com.xtracr.realcamera.renderer.state.VertexData;
+import com.xtracr.realcamera.util.CameraRotationResolver;
 import com.xtracr.realcamera.util.CameraTransform;
 import com.xtracr.realcamera.util.LocUtil;
-import com.xtracr.realcamera.util.MathUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -23,11 +23,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
 
 public final class RealCameraCore {
     private static final MultiVertexCatcher vertexCatcher = MultiVertexCatcher.create();
     private static final CameraTransform smoothedCamera = new CameraTransform();
+    private static final CameraRotationResolver rotationResolver = new CameraRotationResolver();
     private static BindResult lastResult = BindResult.EMPTY, newResult = BindResult.EMPTY;
+    private static Object trackedLevel;
+    private static Entity trackedEntity;
+    private static BindTarget trackedTarget;
     private static boolean active = false, rendering = false;
     private static int failureFrames = 0;
 
@@ -53,6 +58,7 @@ public final class RealCameraCore {
         smoothedCamera.setPosition(Vec3.ZERO);
         smoothedCamera.setRotation(new Matrix3f());
         failureFrames = 0;
+        resetRotationTracking();
     }
 
     public static Vec3 getRawPos(Vec3 cameraPos, Vec3 entityPos) {
@@ -62,9 +68,16 @@ public final class RealCameraCore {
     }
 
     public static Vec3 getEulerAngle(float pitch, float yaw, float roll) {
-        if (!currentTarget().bindConfig().bindRotation()) return new Vec3(pitch, yaw, roll);
-        double scale = Math.toDegrees(1);
-        return MathUtil.getEulerAngleYXZ(smoothedCamera.getRotation()).multiply(scale, -scale, scale);
+        BindTarget target = currentTarget();
+        Vector3d result = rotationResolver.resolve(
+                smoothedCamera.getRotation(),
+                pitch,
+                yaw,
+                roll,
+                target.bindConfig(),
+                target.offsets()
+        );
+        return new Vec3(result.x, result.y, result.z);
     }
 
     public static void computeCamera(Minecraft client, float partialTicks) {
@@ -93,12 +106,14 @@ public final class RealCameraCore {
             }
             if (!lastResult.available() || failureFrames > retentionFrames) {
                 lastResult = BindResult.EMPTY;
+                resetRotationTracking();
                 active = false;
                 return;
             }
         }
         smoothedCamera.lerpPosition(lastResult.getPosition(), 1 - ConfigFile.config().binding.displacementSmoothFactor);
         smoothedCamera.slerpRotation(lastResult.getRotation(), 1 - ConfigFile.config().binding.rotationSmoothFactor);
+        updateRotationTrackingContext(client, entity);
     }
 
     public static void renderCameraEntity(Minecraft client, float partialTicks, SubmitNodeCollector submitNodeCollector, Matrix4f modelView) {
@@ -165,5 +180,21 @@ public final class RealCameraCore {
             newResult = result;
             return;
         }
+    }
+
+    private static void updateRotationTrackingContext(Minecraft client, Entity entity) {
+        BindTarget target = lastResult.target;
+        if (trackedLevel == client.level && trackedEntity == entity && trackedTarget == target) return;
+        rotationResolver.reset();
+        trackedLevel = client.level;
+        trackedEntity = entity;
+        trackedTarget = target;
+    }
+
+    private static void resetRotationTracking() {
+        rotationResolver.reset();
+        trackedLevel = null;
+        trackedEntity = null;
+        trackedTarget = null;
     }
 }

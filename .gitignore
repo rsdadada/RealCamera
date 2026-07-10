@@ -29,6 +29,7 @@ bin/
 
 # run
 run/
+/common/logs/
 
 # java
 hs_err_*.log

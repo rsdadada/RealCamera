@@ -50,6 +50,13 @@ public record BindTarget(
     public record TargetConfig(float forwardU, float forwardV, float upwardU, float upwardV, float posU, float posV) {
     }
 
-    public record BindConfig(boolean bindX, boolean bindY, boolean bindZ, boolean bindRotation) {
+    public record BindConfig(boolean bindX, boolean bindY, boolean bindZ, boolean bindPitch, boolean bindYaw, boolean bindRoll) {
+        public BindConfig(boolean bindX, boolean bindY, boolean bindZ, boolean bindRotation) {
+            this(bindX, bindY, bindZ, bindRotation, bindRotation, bindRotation);
+        }
+
+        public boolean bindRotation() {
+            return bindPitch && bindYaw && bindRoll;
+        }
     }
 }

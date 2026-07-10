@@ -16,7 +16,10 @@ import java.util.function.Supplier;
 
 public final class ConfigFile {
     private static final String FILE_NAME = RealCamera.MOD_ID + ".json";
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(BindTarget.BindConfig.class, new BindConfigJsonAdapter())
+            .setPrettyPrinting()
+            .create();
     private final static Supplier<Path> path = Suppliers.memoize(ConfigFile::getPath);
     @Nullable
     private static ModConfig config;
