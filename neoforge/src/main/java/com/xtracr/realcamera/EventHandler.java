@@ -26,7 +26,8 @@ public final class EventHandler {
         if (player == null
                 || client.getCameraEntity() != player
                 || event.getRenderState().id != player.getId()
-                || !CompatibilityHelper.DS_isDragon(player)) return;
+                || !CompatibilityHelper.DS_isDragon(player)
+                || CompatibilityHelper.DS_hasModelSwapOrDoesNotUseModel(player)) return;
 
         event.setCanceled(true);
     }
