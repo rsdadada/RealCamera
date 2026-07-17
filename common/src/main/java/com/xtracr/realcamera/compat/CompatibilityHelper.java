@@ -12,6 +12,7 @@ public final class CompatibilityHelper {
     public static boolean isRenderInScreen;
     private static final ThreadLocal<Integer> CAMERA_ENTITY_RENDER_DEPTH = ThreadLocal.withInitial(() -> 0);
     private static PlatformHelper platformHelper;
+    private static Method DS_DragonStateProvider_isDragon;
     private static Method NEA_playerTransformer_setDeltaTick;
     private static Field NEA_NEAnimationsLoader_INSTANCE;
     private static Field NEA_NEAnimationsLoader_playerTransformer;
@@ -22,7 +23,15 @@ public final class CompatibilityHelper {
         CompatibilityHelper.platformHelper = platformHelper;
         LegacyBindingMode.register();
         if (isModLoaded("yes_steve_model")) YSMCompat.register();
-        if (isModLoaded("dragonsurvival")) DragonSurvivalCompat.register();
+        if (isModLoaded("dragonsurvival")) {
+            DragonSurvivalCompat.register();
+            try {
+                Class<?> provider = Class.forName("by.dragonsurvivalteam.dragonsurvival.common.capability.DragonStateProvider");
+                DS_DragonStateProvider_isDragon = provider.getMethod("isDragon", Entity.class);
+            } catch (Exception | LinkageError e) {
+                RealCamera.LOGGER.warn("Compatibility with Dragon Survival is outdated: [{}] {}", e.getClass().getName(), e.getMessage());
+            }
+        }
         if (isModLoaded("freecam")) try {
             Class<?> FC_Freecam = Class.forName("net.xolt.freecam.Freecam");
             Method FC_Freecam_isEnabled = FC_Freecam.getDeclaredMethod("isEnabled");
@@ -80,6 +89,16 @@ public final class CompatibilityHelper {
         } finally {
             if (previousDepth == 0) CAMERA_ENTITY_RENDER_DEPTH.remove();
             else CAMERA_ENTITY_RENDER_DEPTH.set(previousDepth);
+        }
+    }
+
+    public static boolean DS_isDragon(Entity entity) {
+        Method method = DS_DragonStateProvider_isDragon;
+        if (method == null) return false;
+        try {
+            return (boolean) method.invoke(null, entity);
+        } catch (Exception | LinkageError ignored) {
+            return false;
         }
     }
 
