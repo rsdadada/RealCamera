@@ -13,6 +13,7 @@ public final class CompatibilityHelper {
     private static final ThreadLocal<Integer> CAMERA_ENTITY_RENDER_DEPTH = ThreadLocal.withInitial(() -> 0);
     private static PlatformHelper platformHelper;
     private static Method DS_DragonStateProvider_isDragon;
+    private static Method DS_Compat_hasModelSwapOrDoesNotUseModel;
     private static Method NEA_playerTransformer_setDeltaTick;
     private static Field NEA_NEAnimationsLoader_INSTANCE;
     private static Field NEA_NEAnimationsLoader_playerTransformer;
@@ -28,7 +29,11 @@ public final class CompatibilityHelper {
             try {
                 Class<?> provider = Class.forName("by.dragonsurvivalteam.dragonsurvival.common.capability.DragonStateProvider");
                 DS_DragonStateProvider_isDragon = provider.getMethod("isDragon", Entity.class);
+                Class<?> compat = Class.forName("by.dragonsurvivalteam.dragonsurvival.compat.Compat");
+                DS_Compat_hasModelSwapOrDoesNotUseModel = compat.getMethod("hasModelSwapOrDoesNotUseModel", Player.class);
             } catch (Exception | LinkageError e) {
+                DS_DragonStateProvider_isDragon = null;
+                DS_Compat_hasModelSwapOrDoesNotUseModel = null;
                 RealCamera.LOGGER.warn("Compatibility with Dragon Survival is outdated: [{}] {}", e.getClass().getName(), e.getMessage());
             }
         }
@@ -99,6 +104,16 @@ public final class CompatibilityHelper {
             return (boolean) method.invoke(null, entity);
         } catch (Exception | LinkageError ignored) {
             return false;
+        }
+    }
+
+    public static boolean DS_hasModelSwapOrDoesNotUseModel(Player player) {
+        Method method = DS_Compat_hasModelSwapOrDoesNotUseModel;
+        if (method == null) return true;
+        try {
+            return (boolean) method.invoke(null, player);
+        } catch (Exception | LinkageError ignored) {
+            return true;
         }
     }
 
