@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 public final class CompatibilityHelper {
     public static boolean isRenderInScreen;
+    private static final ThreadLocal<Integer> CAMERA_ENTITY_RENDER_DEPTH = ThreadLocal.withInitial(() -> 0);
     private static PlatformHelper platformHelper;
     private static Method NEA_playerTransformer_setDeltaTick;
     private static Field NEA_NEAnimationsLoader_INSTANCE;
@@ -64,6 +65,21 @@ public final class CompatibilityHelper {
             }
         } catch (Exception e) {
             RealCamera.LOGGER.warn("Compatibility with EntityModelFeatures is outdated: [{}] {}", e.getClass().getName(), e.getMessage());
+        }
+    }
+
+    public static boolean isRenderingCameraEntity() {
+        return CAMERA_ENTITY_RENDER_DEPTH.get() > 0;
+    }
+
+    public static void runAsCameraEntityRender(Runnable action) {
+        int previousDepth = CAMERA_ENTITY_RENDER_DEPTH.get();
+        CAMERA_ENTITY_RENDER_DEPTH.set(previousDepth + 1);
+        try {
+            action.run();
+        } finally {
+            if (previousDepth == 0) CAMERA_ENTITY_RENDER_DEPTH.remove();
+            else CAMERA_ENTITY_RENDER_DEPTH.set(previousDepth);
         }
     }
 
