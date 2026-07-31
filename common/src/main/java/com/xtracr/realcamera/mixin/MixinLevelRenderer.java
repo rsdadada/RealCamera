@@ -5,6 +5,7 @@ import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.xtracr.realcamera.RealCameraCore;
 import com.xtracr.realcamera.config.ConfigFile;
+import com.xtracr.realcamera.internal.CameraEntityRenderContext;
 import com.xtracr.realcamera.util.CrosshairUtil;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -54,8 +55,10 @@ public abstract class MixinLevelRenderer {
             RealCameraCore.renderCameraEntity(minecraft, partialTicks, output, cameraState.viewRotationMatrix);
         else {
             Vec3 cameraPos = cameraState.pos;
-            EntityRenderState state = entityRenderDispatcher.extractEntity(entity, partialTicks);
-            entityRenderDispatcher.submit(state, cameraState, state.x - cameraPos.x, state.y - cameraPos.y, state.z - cameraPos.z, poseStack, output);
+            CameraEntityRenderContext.run(() -> {
+                EntityRenderState state = entityRenderDispatcher.extractEntity(entity, partialTicks);
+                entityRenderDispatcher.submit(state, cameraState, state.x - cameraPos.x, state.y - cameraPos.y, state.z - cameraPos.z, poseStack, output);
+            });
         }
     }
 }

@@ -77,13 +77,13 @@
     * OptiFine
     * Armourer's Workshop（时装工坊）（真实相机0.6版本以上）
     * 基于GeckoLib的盔甲
-    * Customizable Player Models（自定义玩家模型）
     * Epic Fight（史诗战斗）（真实相机0.6版本以下）
     * [TaCZ]永恒枪械工坊：零 1.1.4版本及以上
 * 兼容:
     * 大多数修改玩家镜头的模组
     * 多数模型模组
     * Armourer's Workshop（时装工坊）（真实相机0.6版本以下）
+    * Customizable Player Models（自定义玩家模型）（需要CPM 0.6.26a及以上版本，推荐0.6.27a；自定义纹理或UV布局可能需要在模型预览中手动配置绑定目标）
     * Epic Fight（史诗战斗）（真实相机0.6版本以上）
     * First-person Model（更真实的第一人称模型）
     * Not Enough Animations（更多动画）

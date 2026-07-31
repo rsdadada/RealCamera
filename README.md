@@ -77,7 +77,6 @@ Snapshots are [here](https://github.com/xTracr/RealCamera/actions/workflows/buil
     * OptiFine
     * Armourer's Workshop (Mod version 0.6+)
     * Armors based on GeckoLib
-    * Customizable Player Models
     * Epic Fight (Mod version 0.6-)
     * Timeless and Classics Zero,version 1.1.4+
 
@@ -85,6 +84,7 @@ Snapshots are [here](https://github.com/xTracr/RealCamera/actions/workflows/buil
     * most camera mods
     * most player model mods
     * Armourer's Workshop (Mod version 0.6-)
+    * Customizable Player Models (CPM 0.6.26a+; 0.6.27a recommended. Custom textures or UV layouts may require a manual binding target in Model View.)
     * Epic Fight (Mod version 0.6+)
     * First-person Model
     * Not Enough Animations

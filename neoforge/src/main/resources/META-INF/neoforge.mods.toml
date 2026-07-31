@@ -47,6 +47,14 @@ ignore = false
 modrinth = "cloth-config"
 curseforge = "cloth-config"
 
+[[dependencies.realcamera]]
+modId = "cpm"
+type = "optional"
+reason = "RealCamera 0.7.x requires Customizable Player Models 0.6.26a or newer."
+versionRange = "[0.6.26a,)"
+ordering = "NONE"
+side = "CLIENT"
+
 [[mixins]]
 config = "realcamera-common.mixins.json"
 

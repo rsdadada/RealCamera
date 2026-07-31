@@ -7,6 +7,7 @@ import com.xtracr.realcamera.compat.DisableHelper;
 import com.xtracr.realcamera.config.BindTarget;
 import com.xtracr.realcamera.config.ConfigFile;
 import com.xtracr.realcamera.config.DisableConfig;
+import com.xtracr.realcamera.internal.CameraEntityRenderContext;
 import com.xtracr.realcamera.renderer.BuiltIterableBuffer;
 import com.xtracr.realcamera.renderer.MultiVertexCatcher;
 import com.xtracr.realcamera.renderer.RoutingSubmitCollector;
@@ -72,10 +73,12 @@ public final class RealCameraCore {
         boolean invisible = entity.isInvisible();
         entity.setInvisible(false);
         try {
-            newResult = RealCameraAPI.computeBindResult(client, partialTicks);
+            CameraEntityRenderContext.run(() ->
+                    newResult = RealCameraAPI.computeBindResult(client, partialTicks));
             if (!newResult.available()) {
                 EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
-                dispatcher.submit(dispatcher.extractEntity(entity, partialTicks), new CameraRenderState(), 0, 0, 0, new PoseStack(), vertexCatcher.initCollector());
+                CameraEntityRenderContext.run(() ->
+                        dispatcher.submit(dispatcher.extractEntity(entity, partialTicks), new CameraRenderState(), 0, 0, 0, new PoseStack(), vertexCatcher.initCollector()));
                 vertexCatcher.forEachBuffer(RealCameraCore::computeBindResult);
             }
         } finally {
@@ -112,7 +115,8 @@ public final class RealCameraCore {
         Entity entity = client.getCameraEntity();
         EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
         SubmitNodeCollector collector = new RoutingSubmitCollector(submitNodeCollector, vertexCatcher.initCollector());
-        dispatcher.submit(dispatcher.extractEntity(entity, partialTicks), new CameraRenderState(), 0, 0, 0, poseStack, collector);
+        CameraEntityRenderContext.run(() ->
+                dispatcher.submit(dispatcher.extractEntity(entity, partialTicks), new CameraRenderState(), 0, 0, 0, poseStack, collector));
         final float m02 = modelView.m02(), m12 = modelView.m12(), m22 = modelView.m22(), m32 = modelView.m32();
         final float depth = currentTarget().disablingDepth();
         vertexCatcher.forEachBuffer(builtBuffer -> {
